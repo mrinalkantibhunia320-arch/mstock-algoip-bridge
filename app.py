@@ -34,11 +34,7 @@ def mstock_proxy():
             proxies=proxies,
             timeout=(8, 12),
         )
-        return jsonify({
-            "http_code": resp.status_code,
-            "body": resp.text,
-            "egress_ip": host,
-        }), 200
+       return jsonify({"http_code": 502, "body": str(e)[-130:]}), 200
     except Exception as e:
         return jsonify({"http_code": 502, "body": f"Proxy Error: {e}"}), 200
 
