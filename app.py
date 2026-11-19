@@ -8,6 +8,18 @@ app = Flask(__name__)
 def health():
     return "AlgoIP m.Stock Bridge is Live!", 200
 
+@app.route("/my-ip", methods=["GET"])
+def my_ip():
+    try:
+        v4 = requests.get("https://ipv4.icanhazip.com", timeout=5).text.strip()
+    except Exception as e:
+        v4 = f"Unavailable ({e})"
+    try:
+        v6 = requests.get("https://ipv6.icanhazip.com", timeout=5).text.strip()
+    except Exception:
+        v6 = "Not available (IPv4 only)"
+    return jsonify({"ipv4": v4, "ipv6": v6}), 200
+
 @app.route("/mstock-proxy", methods=["POST"])
 def mstock_proxy():
     try:
