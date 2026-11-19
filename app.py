@@ -16,27 +16,22 @@ def mstock_proxy():
         target_url = str(data.get("target_url", "")).strip()
         headers = data.get("headers") or {}
         body = data.get("body", "")
-
         host = str(data.get("algoip_host", "")).strip()
         port = str(data.get("algoip_port", "443")).strip()
         user = quote(str(data.get("algoip_user", "")).strip(), safe="")
         passwd = quote(str(data.get("algoip_pass", "")).strip(), safe="")
-
-        # Python requests must use http:// CONNECT tunnel on Port 443 (AlgoIP.in docs)
         proxy_url = f"http://{user}:{passwd}@{host}:{port}"
-        proxies = {"http": proxy_url, "https": proxy_url}
-
         resp = requests.request(
             method=method,
             url=target_url,
             headers=headers,
             data=body if method != "GET" else None,
-            proxies=proxies,
+            proxies={"http": proxy_url, "https": proxy_url},
             timeout=(8, 12),
         )
-       return jsonify({"http_code": 502, "body": str(e)[-130:]}), 200
+        return jsonify({"http_code": resp.status_code, "body": resp.text, "egress_ip": host}), 200
     except Exception as e:
-        return jsonify({"http_code": 502, "body": f"Proxy Error: {e}"}), 200
+        return jsonify({"http_code": 502, "body": str(e)[-130:]}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
